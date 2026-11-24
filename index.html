@@ -89,7 +89,8 @@ transition:transform .35s var(--ease-spring),box-shadow .35s,border-color .3s;bo
 .ff-osd{position:fixed;top:64px;right:26px;z-index:70;font-family:var(--font-mono);font-weight:600;font-size:.78rem;letter-spacing:.22em;color:var(--accent);background:rgba(12,9,6,.88);border:1px solid var(--line-bright);padding:9px 14px;border-radius:6px;opacity:0;transition:opacity .18s;pointer-events:none}
 body.ff-out .fflines,body.ff-in .fflines{opacity:1;animation:ffroll .12s linear infinite}
 body.ff-out .ff-osd,body.ff-in .ff-osd{opacity:1}
-.ff-osd.armed{opacity:.55}
+.ff-osd.armed{opacity:.92}
+html,body{overscroll-behavior-y:none}
 @keyframes ffroll{to{background-position:0 44px}}
 body.ff-out main{animation:ffOut .34s cubic-bezier(.6,.02,.9,.5) both}
 body.ff-out.ff-rew main{animation-name:ffOutR}
@@ -358,7 +359,7 @@ window.TERM_LINES=[
   const ffHint=document.getElementById('ffOsd');
   function disarm(){armDir=0;acc=0;if(ffHint)ffHint.classList.remove('armed');}
   function armEdge(dir){
-    armDir=dir;armUntil=performance.now()+1700;acc=0;
+    armDir=dir;armUntil=performance.now()+3500;acc=0;clearTimeout(window.__ffHintT);window.__ffHintT=setTimeout(disarm,3500);
     if(ffHint){ffHint.textContent=dir>0?'\u25B6\u25B6 once more for FFWD':'\u25C0\u25C0 once more for REW';ffHint.classList.add('armed');}
   }
   function edgeScroll(dir,amount,newGesture){
@@ -379,13 +380,12 @@ window.TERM_LINES=[
     if(!dir)return;
     const now=performance.now();
     const newG=now-lastW>250;lastW=now;
-    clearTimeout(window.__ffHintT);window.__ffHintT=setTimeout(()=>{if(ffHint)ffHint.classList.remove('armed');},180);
-    if(!atEdge(dir)){if(armDir)disarm();return;}
+        if(!atEdge(dir)){if(armDir)disarm();return;}
     edgeScroll(dir,Math.abs(e.deltaY),newG);
   },{passive:true});
   let tY=null,tNew=false;
   addEventListener('touchstart',e=>{tY=e.touches[0].clientY;tNew=true;},{passive:true});
-  addEventListener('touchend',()=>{tY=null;if(ffHint)ffHint.classList.remove('armed');},{passive:true});
+  addEventListener('touchend',()=>{tY=null;},{passive:true});
   addEventListener('touchmove',e=>{
     if(ffLock||tY===null)return;
     const y=e.touches[0].clientY,dy=tY-y;tY=y;
